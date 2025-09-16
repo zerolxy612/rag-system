@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui';
 import { formatDate } from '@/shared/utils';
 import { RequirePermission } from '@/shared/auth';
+import { AdvancedPromptEditor } from '@/features/prompt-editor/components/advanced-prompt-editor';
+import type { Prompt } from '@/entities';
 
 // 模拟数据
 const mockPrompts = [
@@ -34,9 +36,11 @@ const mockPrompts = [
 ];
 
 export default function PromptsPage() {
-  const [prompts] = useState(mockPrompts);
+  const [prompts, setPrompts] = useState(mockPrompts);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingPrompt, setEditingPrompt] = useState<Partial<Prompt> | undefined>();
 
   const filteredPrompts = prompts.filter(prompt => {
     const matchesSearch = prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,6 +51,75 @@ export default function PromptsPage() {
 
   const categories = Array.from(new Set(prompts.map(p => p.category)));
 
+  // 编辑器处理函数
+  const handleCreatePrompt = () => {
+    setEditingPrompt(undefined);
+    setShowEditor(true);
+  };
+
+  const handleEditPrompt = (prompt: Prompt) => {
+    setEditingPrompt(prompt);
+    setShowEditor(true);
+  };
+
+  const handleSavePrompt = (promptData: Partial<Prompt>) => {
+    if (editingPrompt?.id) {
+      // 更新现有 Prompt
+      setPrompts(prev => prev.map(p =>
+        p.id === editingPrompt.id
+          ? { ...p, ...promptData, updatedAt: new Date() }
+          : p
+      ));
+    } else {
+      // 创建新 Prompt
+      const newPrompt: Prompt = {
+        id: Date.now().toString(),
+        title: promptData.title || '',
+        content: promptData.content || '',
+        category: promptData.category || '',
+        tags: promptData.tags || [],
+        variables: promptData.variables || [],
+        version: 1,
+        status: 'draft',
+        authorId: 'current-user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      setPrompts(prev => [newPrompt, ...prev]);
+    }
+    setShowEditor(false);
+    setEditingPrompt(undefined);
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditor(false);
+    setEditingPrompt(undefined);
+  };
+
+  const handleTestPrompt = async (content: string, variables: Record<string, any>): Promise<string> => {
+    // 模拟 AI 测试
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    let result = content;
+    Object.entries(variables).forEach(([key, value]) => {
+      result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), String(value));
+    });
+
+    return `测试结果:\n\n${result}\n\n---\n✅ 变量替换成功\n📊 内容长度: ${result.length} 字符`;
+  };
+
+  // 如果显示编辑器，渲染编辑器页面
+  if (showEditor) {
+    return (
+      <AdvancedPromptEditor
+        prompt={editingPrompt}
+        onSave={handleSavePrompt}
+        onCancel={handleCancelEdit}
+        onTest={handleTestPrompt}
+      />
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* 页面标题 */}
@@ -56,7 +129,7 @@ export default function PromptsPage() {
           <p className="text-gray-600">管理和编辑 Prompt 模板</p>
         </div>
         <RequirePermission permission="prompts:write">
-          <Button>
+          <Button onClick={handleCreatePrompt}>
             ➕ 新建 Prompt
           </Button>
         </RequirePermission>
@@ -131,15 +204,20 @@ export default function PromptsPage() {
                 
                 <div className="flex gap-2 pt-2">
                   <RequirePermission permission="prompts:write">
-                    <Button size="sm" variant="outline" className="flex-1">
-                      编辑
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleEditPrompt(prompt)}
+                    >
+                      ✏️ 编辑
                     </Button>
                   </RequirePermission>
                   <Button size="sm" variant="outline">
-                    测试
+                    🧪 测试
                   </Button>
                   <Button size="sm" variant="outline">
-                    版本
+                    📋 版本
                   </Button>
                 </div>
               </div>

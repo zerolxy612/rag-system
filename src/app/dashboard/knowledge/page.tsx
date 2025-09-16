@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui';
 import { formatDate } from '@/shared/utils';
 import { RequirePermission } from '@/shared/auth';
+import { KnowledgeEditor } from '@/features/knowledge-crud/components/knowledge-editor';
+import type { KnowledgeItem } from '@/entities';
 
 // 模拟数据
 const mockKnowledge = [
@@ -67,10 +69,12 @@ const severityColors = {
 };
 
 export default function KnowledgePage() {
-  const [knowledge] = useState(mockKnowledge);
+  const [knowledge, setKnowledge] = useState(mockKnowledge);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingItem, setEditingItem] = useState<Partial<KnowledgeItem> | undefined>();
 
   const filteredKnowledge = knowledge.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -84,6 +88,62 @@ export default function KnowledgePage() {
   const types = Object.keys(typeLabels);
   const categories = Array.from(new Set(knowledge.map(k => k.category)));
 
+  // 编辑器处理函数
+  const handleCreateItem = () => {
+    setEditingItem(undefined);
+    setShowEditor(true);
+  };
+
+  const handleEditItem = (item: KnowledgeItem) => {
+    setEditingItem(item);
+    setShowEditor(true);
+  };
+
+  const handleSaveItem = (itemData: Partial<KnowledgeItem>) => {
+    if (editingItem?.id) {
+      // 更新现有条目
+      setKnowledge(prev => prev.map(item =>
+        item.id === editingItem.id
+          ? { ...item, ...itemData, updatedAt: new Date() }
+          : item
+      ));
+    } else {
+      // 创建新条目
+      const newItem: KnowledgeItem = {
+        id: Date.now().toString(),
+        title: itemData.title || '',
+        content: itemData.content || '',
+        type: itemData.category as any || 'guideline',
+        category: itemData.category || '',
+        severity: itemData.severity || 'medium',
+        keywords: itemData.keywords || [],
+        description: itemData.description || '',
+        enabled: itemData.enabled ?? true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      setKnowledge(prev => [newItem, ...prev]);
+    }
+    setShowEditor(false);
+    setEditingItem(undefined);
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditor(false);
+    setEditingItem(undefined);
+  };
+
+  // 如果显示编辑器，渲染编辑器页面
+  if (showEditor) {
+    return (
+      <KnowledgeEditor
+        item={editingItem}
+        onSave={handleSaveItem}
+        onCancel={handleCancelEdit}
+      />
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* 页面标题 */}
@@ -93,7 +153,7 @@ export default function KnowledgePage() {
           <p className="text-gray-600">管理敏感内容和常见问题</p>
         </div>
         <RequirePermission permission="knowledge:write">
-          <Button>
+          <Button onClick={handleCreateItem}>
             ➕ 新建知识条目
           </Button>
         </RequirePermission>
@@ -208,18 +268,24 @@ export default function KnowledgePage() {
                 </div>
                 
                 <div className="flex gap-2 ml-4">
+                  <RequirePermission permission="knowledge:write">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEditItem(item)}
+                    >
+                      ✏️ 编辑
+                    </Button>
+                  </RequirePermission>
                   <Button size="sm" variant="outline">
-                    编辑
+                    📄 详情
                   </Button>
-                  <Button size="sm" variant="outline">
-                    详情
-                  </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="outline"
-                    className={item.isActive ? 'text-red-600' : 'text-green-600'}
+                    className={item.enabled ? 'text-red-600' : 'text-green-600'}
                   >
-                    {item.isActive ? '禁用' : '启用'}
+                    {item.enabled ? '🔴 禁用' : '🟢 启用'}
                   </Button>
                 </div>
               </div>

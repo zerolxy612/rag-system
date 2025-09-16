@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/shared/ui';
 import { formatDate, formatRelativeTime } from '@/shared/utils';
 import { RequirePermission } from '@/shared/auth';
+import { SyncManager } from '@/features/officials-sync/components/sync-manager';
 
 // 模拟数据
 const mockOfficials = [
@@ -46,10 +47,11 @@ const mockOfficials = [
 ];
 
 export default function OfficialsPage() {
-  const [officials] = useState(mockOfficials);
+  const [officials, setOfficials] = useState(mockOfficials);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [showSyncManager, setShowSyncManager] = useState(false);
 
   const filteredOfficials = officials.filter(official => {
     const matchesSearch = official.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -61,12 +63,42 @@ export default function OfficialsPage() {
   const departments = Array.from(new Set(officials.map(o => o.department)));
 
   const handleSync = async () => {
-    setSyncing(true);
-    // 模拟同步过程
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setSyncing(false);
-    // 这里应该刷新数据
+    // 模拟同步成功后的数据更新
+    const newOfficials = [
+      {
+        id: Date.now().toString(),
+        name: '张三',
+        position: '市长',
+        department: '市政府',
+        level: 'city',
+        phone: '138-0000-0001',
+        email: 'zhangsan@gov.cn',
+        status: 'active' as const,
+        lastUpdated: new Date(),
+      },
+      ...officials,
+    ];
+    setOfficials(newOfficials);
+    setShowSyncManager(false);
   };
+
+  const handleCancelSync = () => {
+    setShowSyncManager(false);
+  };
+
+  const handleOpenSyncManager = () => {
+    setShowSyncManager(true);
+  };
+
+  // 如果显示同步管理器，渲染同步管理器页面
+  if (showSyncManager) {
+    return (
+      <SyncManager
+        onSync={handleSync}
+        onCancel={handleCancelSync}
+      />
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -83,7 +115,7 @@ export default function OfficialsPage() {
             </Button>
           </RequirePermission>
           <RequirePermission permission="officials:sync">
-            <Button loading={syncing} onClick={handleSync}>
+            <Button onClick={handleOpenSyncManager}>
               🔄 一键同步
             </Button>
           </RequirePermission>
