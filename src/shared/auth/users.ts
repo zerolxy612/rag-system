@@ -58,8 +58,16 @@ export const USERS: AuthUser[] = [
   },
 ];
 
+// 权限类型定义
+export type Permission =
+  | 'prompts:read' | 'prompts:write' | 'prompts:delete'
+  | 'officials:read' | 'officials:write' | 'officials:sync'
+  | 'knowledge:read' | 'knowledge:write' | 'knowledge:delete'
+  | 'audit:read'
+  | 'users:read' | 'users:write';
+
 // 角色权限定义
-export const ROLE_PERMISSIONS = {
+export const ROLE_PERMISSIONS: Record<AuthUser['role'], Permission[]> = {
   admin: [
     'prompts:read',
     'prompts:write',
@@ -88,7 +96,7 @@ export const ROLE_PERMISSIONS = {
     'knowledge:read',
     'audit:read',
   ],
-} as const;
+};
 
 // 用户认证函数
 export function authenticateUser(usernameOrEmail: string, password: string): AuthUser | null {
@@ -100,8 +108,8 @@ export function authenticateUser(usernameOrEmail: string, password: string): Aut
 }
 
 // 检查用户权限
-export function hasPermission(userRole: AuthUser['role'], permission: string): boolean {
-  return ROLE_PERMISSIONS[userRole].includes(permission as any);
+export function hasPermission(userRole: AuthUser['role'], permission: Permission): boolean {
+  return ROLE_PERMISSIONS[userRole]?.includes(permission) ?? false;
 }
 
 // 获取角色显示名称

@@ -98,10 +98,10 @@ export interface ValidationRule {
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: any) => string | null;
+  custom?: (value: unknown) => string | null;
 }
 
-export const validateField = (value: any, rules: ValidationRule): string | null => {
+export const validateField = (value: unknown, rules: ValidationRule): string | null => {
   if (rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
     return '此字段为必填项';
   }
@@ -128,7 +128,7 @@ export const validateField = (value: any, rules: ValidationRule): string | null 
 };
 
 // 批量验证表单
-export const validateForm = <T extends Record<string, any>>(
+export const validateForm = <T extends Record<string, unknown>>(
   data: T,
   rules: Record<keyof T, ValidationRule>
 ): { isValid: boolean; errors: Record<keyof T, string | null> } => {

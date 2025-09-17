@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthUser, authenticateUser } from './users';
+import { AuthUser, authenticateUser, hasPermission, type Permission } from './users';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -98,12 +98,11 @@ export function useAuth() {
 }
 
 // 权限检查 Hook
-export function usePermission(permission: string) {
+export function usePermission(permission: Permission) {
   const { user } = useAuth();
-  
+
   if (!user) return false;
-  
-  const { hasPermission } = require('./users');
+
   return hasPermission(user.role, permission);
 }
 

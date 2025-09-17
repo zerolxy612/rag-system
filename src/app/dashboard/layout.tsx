@@ -4,9 +4,15 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/shared/utils';
-import { ProtectedRoute, useAuth, RequirePermission, getRoleDisplayName } from '@/shared/auth';
+import { ProtectedRoute, useAuth, RequirePermission, getRoleDisplayName, type Permission } from '@/shared/auth';
 
-const navigation = [
+const navigation: Array<{
+  name: string;
+  href: string;
+  icon: string;
+  description: string;
+  permission: Permission;
+}> = [
   {
     name: 'Prompts',
     href: '/dashboard/prompts',

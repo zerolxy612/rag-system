@@ -22,7 +22,7 @@ interface AdvancedPromptEditorProps {
   prompt?: Partial<Prompt>;
   onSave: (prompt: Partial<Prompt>) => void;
   onCancel: () => void;
-  onTest?: (content: string, variables: Record<string, any>) => Promise<string>;
+  onTest?: (content: string, variables: Record<string, string>) => Promise<string>;
 }
 
 export function AdvancedPromptEditor({ 
@@ -39,12 +39,12 @@ export function AdvancedPromptEditor({
     variables: prompt?.variables || [],
   });
 
-  const [testValues, setTestValues] = useState<Record<string, any>>({});
+  const [testValues, setTestValues] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState('');
   const [testResult, setTestResult] = useState('');
   const [isTestLoading, setIsTestLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<unknown>(null);
 
   // 解析内容中的变量
   const parseVariables = (text: string): string[] => {
@@ -134,7 +134,7 @@ export function AdvancedPromptEditor({
     }));
   };
 
-  const handleVariableChange = (index: number, field: keyof PromptVariable, value: any) => {
+  const handleVariableChange = (index: number, field: keyof PromptVariable, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       variables: prev.variables.map((variable, i) => 
@@ -143,7 +143,7 @@ export function AdvancedPromptEditor({
     }));
   };
 
-  const handleTestValueChange = (varName: string, value: any) => {
+  const handleTestValueChange = (varName: string, value: string) => {
     setTestValues(prev => ({ ...prev, [varName]: value }));
   };
 
@@ -180,7 +180,7 @@ export function AdvancedPromptEditor({
     onSave(promptData);
   };
 
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: unknown) => {
     editorRef.current = editor;
     // 编辑器挂载成功，不需要额外配置
     console.log('Monaco Editor mounted successfully');

@@ -13,6 +13,10 @@ const mockPrompts = [
     id: '1',
     title: '客服回复模板',
     content: '您好，感谢您的咨询。关于{{问题类型}}，我们的建议是{{解决方案}}。',
+    variables: [
+      { name: '问题类型', type: 'string' as const, required: true },
+      { name: '解决方案', type: 'string' as const, required: true }
+    ],
     category: '客服',
     tags: ['客服', '回复'],
     version: 1,
@@ -25,6 +29,11 @@ const mockPrompts = [
     id: '2',
     title: '政策解读模板',
     content: '根据{{政策名称}}的相关规定，{{具体条款}}。详细信息请参考{{参考链接}}。',
+    variables: [
+      { name: '政策名称', type: 'string' as const, required: true },
+      { name: '具体条款', type: 'string' as const, required: true },
+      { name: '参考链接', type: 'string' as const, required: false }
+    ],
     category: '政策',
     tags: ['政策', '解读'],
     version: 2,
@@ -36,7 +45,7 @@ const mockPrompts = [
 ];
 
 export default function PromptsPage() {
-  const [prompts, setPrompts] = useState(mockPrompts);
+  const [prompts, setPrompts] = useState<Prompt[]>(mockPrompts);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showEditor, setShowEditor] = useState(false);
@@ -67,7 +76,7 @@ export default function PromptsPage() {
       // 更新现有 Prompt
       setPrompts(prev => prev.map(p =>
         p.id === editingPrompt.id
-          ? { ...p, ...promptData, updatedAt: new Date() }
+          ? { ...p, ...promptData, updatedAt: new Date() } as Prompt
           : p
       ));
     } else {

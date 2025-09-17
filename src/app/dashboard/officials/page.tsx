@@ -5,6 +5,7 @@ import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/share
 import { formatDate, formatRelativeTime } from '@/shared/utils';
 import { RequirePermission } from '@/shared/auth';
 import { SyncManager } from '@/features/officials-sync/components/sync-manager';
+import type { Official } from '@/entities';
 
 // 模拟数据
 const mockOfficials = [
@@ -47,7 +48,7 @@ const mockOfficials = [
 ];
 
 export default function OfficialsPage() {
-  const [officials, setOfficials] = useState(mockOfficials);
+  const [officials, setOfficials] = useState<Official[]>(mockOfficials);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [syncing, setSyncing] = useState(false);
@@ -64,17 +65,18 @@ export default function OfficialsPage() {
 
   const handleSync = async () => {
     // 模拟同步成功后的数据更新
-    const newOfficials = [
+    const newOfficials: Official[] = [
       {
         id: Date.now().toString(),
         name: '张三',
         position: '市长',
         department: '市政府',
-        level: 'city',
-        phone: '138-0000-0001',
-        email: 'zhangsan@gov.cn',
-        status: 'active' as const,
-        lastUpdated: new Date(),
+        level: 1,
+        isActive: true,
+        lastSyncAt: new Date(),
+        source: '官方API',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       ...officials,
     ];

@@ -21,7 +21,7 @@ export interface PromptVariable {
   name: string;
   type: 'string' | 'number' | 'boolean' | 'array';
   description?: string;
-  defaultValue?: any;
+  defaultValue?: unknown;
   required: boolean;
 }
 
@@ -39,12 +39,12 @@ export interface Rule extends BaseEntity {
 export interface RuleCondition {
   field: string;
   operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'regex';
-  value: any;
+  value: string | number | boolean | RegExp;
 }
 
 export interface RuleAction {
   type: 'modify' | 'reject' | 'flag' | 'transform';
-  parameters: Record<string, any>;
+  parameters: Record<string, unknown>;
 }
 
 // KnowledgeItem 实体
@@ -82,8 +82,8 @@ export interface Version extends BaseEntity {
 
 export interface VersionChange {
   field: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   changeType: 'create' | 'update' | 'delete';
 }
 
@@ -93,8 +93,8 @@ export interface AuditLog extends BaseEntity {
   action: string;
   entityType: string;
   entityId: string;
-  changes?: Record<string, any>;
-  metadata?: Record<string, any>;
+  changes?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
 }

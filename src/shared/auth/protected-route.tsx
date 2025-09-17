@@ -3,12 +3,12 @@
 import React, { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './auth-context';
-import { AuthUser } from './users';
+import { AuthUser, hasPermission, type Permission } from './users';
 
 interface ProtectedRouteProps {
   children: ReactNode;
   requiredRole?: AuthUser['role'] | AuthUser['role'][];
-  requiredPermission?: string;
+  requiredPermission?: Permission;
   fallback?: ReactNode;
 }
 
@@ -82,7 +82,6 @@ export function ProtectedRoute({
 
   // 检查具体权限
   if (requiredPermission) {
-    const { hasPermission } = require('./users');
     const hasRequiredPermission = hasPermission(user.role, requiredPermission);
     
     if (!hasRequiredPermission) {
@@ -115,7 +114,7 @@ export function ProtectedRoute({
 
 // 便捷的权限检查组件
 interface RequirePermissionProps {
-  permission: string;
+  permission: Permission;
   children: ReactNode;
   fallback?: ReactNode;
 }
@@ -124,8 +123,7 @@ export function RequirePermission({ permission, children, fallback }: RequirePer
   const { user } = useAuth();
   
   if (!user) return null;
-  
-  const { hasPermission } = require('./users');
+
   const hasRequiredPermission = hasPermission(user.role, permission);
   
   if (!hasRequiredPermission) {

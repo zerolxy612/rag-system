@@ -1,5 +1,5 @@
 // API 请求封装
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
   success: boolean;
@@ -9,7 +9,7 @@ export interface ApiResponse<T = any> {
 export interface ApiError {
   message: string;
   code?: number;
-  details?: any;
+  details?: unknown;
 }
 
 export class ApiClient {
@@ -71,13 +71,22 @@ export class ApiClient {
   }
 
   // GET 请求
-  async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
-    const url = params ? `${endpoint}?${new URLSearchParams(params)}` : endpoint;
+  async get<T>(endpoint: string, params?: Record<string, string | number | boolean | null | undefined>): Promise<ApiResponse<T>> {
+    const searchParams = params
+      ? new URLSearchParams(
+          Object.entries(params).reduce<Record<string, string>>((acc, [key, val]) => {
+            if (val === undefined || val === null) return acc;
+            acc[key] = String(val);
+            return acc;
+          }, {})
+        )
+      : null;
+    const url = searchParams ? `${endpoint}?${searchParams.toString()}` : endpoint;
     return this.request<T>(url, { method: 'GET' });
   }
 
   // POST 请求
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
@@ -85,7 +94,7 @@ export class ApiClient {
   }
 
   // PUT 请求
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
@@ -98,7 +107,7 @@ export class ApiClient {
   }
 
   // PATCH 请求
-  async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
+  async patch<T>(endpoint: string, data?: unknown): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
@@ -111,9 +120,9 @@ export const apiClient = new ApiClient();
 
 // 便捷的请求方法
 export const fetcher = {
-  get: <T>(url: string, params?: Record<string, any>) => apiClient.get<T>(url, params),
-  post: <T>(url: string, data?: any) => apiClient.post<T>(url, data),
-  put: <T>(url: string, data?: any) => apiClient.put<T>(url, data),
+  get: <T>(url: string, params?: Record<string, string | number | boolean | null | undefined>) => apiClient.get<T>(url, params),
+  post: <T>(url: string, data?: unknown) => apiClient.post<T>(url, data),
+  put: <T>(url: string, data?: unknown) => apiClient.put<T>(url, data),
   delete: <T>(url: string) => apiClient.delete<T>(url),
-  patch: <T>(url: string, data?: any) => apiClient.patch<T>(url, data),
+  patch: <T>(url: string, data?: unknown) => apiClient.patch<T>(url, data),
 };

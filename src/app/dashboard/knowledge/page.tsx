@@ -69,7 +69,7 @@ const severityColors = {
 };
 
 export default function KnowledgePage() {
-  const [knowledge, setKnowledge] = useState(mockKnowledge);
+  const [knowledge, setKnowledge] = useState<KnowledgeItem[]>(mockKnowledge);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -104,7 +104,7 @@ export default function KnowledgePage() {
       // 更新现有条目
       setKnowledge(prev => prev.map(item =>
         item.id === editingItem.id
-          ? { ...item, ...itemData, updatedAt: new Date() }
+          ? { ...item, ...itemData, updatedAt: new Date() } as KnowledgeItem
           : item
       ));
     } else {
@@ -113,12 +113,11 @@ export default function KnowledgePage() {
         id: Date.now().toString(),
         title: itemData.title || '',
         content: itemData.content || '',
-        type: itemData.category as any || 'guideline',
+        type: (itemData.type as KnowledgeItem['type']) || 'faq',
         category: itemData.category || '',
         severity: itemData.severity || 'medium',
         keywords: itemData.keywords || [],
-        description: itemData.description || '',
-        enabled: itemData.enabled ?? true,
+        isActive: itemData.isActive ?? true,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -283,9 +282,9 @@ export default function KnowledgePage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className={item.enabled ? 'text-red-600' : 'text-green-600'}
+                    className={item.isActive ? 'text-red-600' : 'text-green-600'}
                   >
-                    {item.enabled ? '🔴 禁用' : '🟢 启用'}
+                    {item.isActive ? '🔴 禁用' : '🟢 启用'}
                   </Button>
                 </div>
               </div>

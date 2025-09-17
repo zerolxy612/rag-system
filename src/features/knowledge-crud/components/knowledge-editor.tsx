@@ -17,8 +17,7 @@ export function KnowledgeEditor({ item, onSave, onCancel }: KnowledgeEditorProps
     category: item?.category || 'sensitive',
     severity: item?.severity || 'medium',
     keywords: item?.keywords?.join(', ') || '',
-    description: item?.description || '',
-    enabled: item?.enabled ?? true,
+    isActive: item?.isActive ?? true,
   });
 
   const [keywordSuggestions] = useState([
@@ -30,7 +29,7 @@ export function KnowledgeEditor({ item, onSave, onCancel }: KnowledgeEditorProps
   const handleInputChange = (field: string) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const value = field === 'enabled' ? (e.target as HTMLInputElement).checked : e.target.value;
+    const value = field === 'isActive' ? (e.target as HTMLInputElement).checked : e.target.value;
     setFormData(prev => ({
       ...prev,
       [field]: value,
@@ -144,11 +143,11 @@ export function KnowledgeEditor({ item, onSave, onCancel }: KnowledgeEditorProps
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  描述
+                  简要描述
                 </label>
                 <Input
-                  value={formData.description}
-                  onChange={handleInputChange('description')}
+                  value={formData.content}
+                  onChange={handleInputChange('content')}
                   placeholder="简要描述这个知识条目的用途"
                 />
               </div>
@@ -247,8 +246,8 @@ export function KnowledgeEditor({ item, onSave, onCancel }: KnowledgeEditorProps
                 </label>
                 <input
                   type="checkbox"
-                  checked={formData.enabled}
-                  onChange={handleInputChange('enabled')}
+                  checked={formData.isActive}
+                  onChange={handleInputChange('isActive')}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
               </div>
@@ -262,8 +261,8 @@ export function KnowledgeEditor({ item, onSave, onCancel }: KnowledgeEditorProps
                   <span className={`px-2 py-1 text-xs rounded ${getSeverityColor(formData.severity)}`}>
                     {formData.severity}
                   </span>
-                  <span className={`px-2 py-1 text-xs rounded ${formData.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                    {formData.enabled ? '已启用' : '已禁用'}
+                  <span className={`px-2 py-1 text-xs rounded ${formData.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                    {formData.isActive ? '已启用' : '已禁用'}
                   </span>
                 </div>
               </div>
