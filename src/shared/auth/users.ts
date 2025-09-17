@@ -61,7 +61,7 @@ export const USERS: AuthUser[] = [
 // 权限类型定义
 export type Permission =
   | 'prompts:read' | 'prompts:write' | 'prompts:delete'
-  | 'officials:read' | 'officials:write' | 'officials:sync'
+  | 'officials:read' | 'officials:write' | 'officials:delete' | 'officials:sync'
   | 'knowledge:read' | 'knowledge:write' | 'knowledge:delete'
   | 'audit:read'
   | 'users:read' | 'users:write';
@@ -74,6 +74,7 @@ export const ROLE_PERMISSIONS: Record<AuthUser['role'], Permission[]> = {
     'prompts:delete',
     'officials:read',
     'officials:write',
+    'officials:delete',
     'officials:sync',
     'knowledge:read',
     'knowledge:write',
